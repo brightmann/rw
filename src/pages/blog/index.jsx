@@ -1,17 +1,9 @@
 import { NextSeo } from 'next-seo'
-import slugify from 'slugify'
 
 import { SimpleLayout } from '@/components/SimpleLayout'
 import { BlogCard } from '@/components/BlogCard'
-import { getDatabase } from '@/lib/notion'
+import { getArticleSlug, getDatabase } from '@/lib/notion'
 import { baseUrl } from '../../seo.config'
-
-function getArticleSlug(article) {
-  return slugify(article.properties?.name.title[0].plain_text, {
-    strict: true,
-    lower: true,
-  })
-}
 
 function distributeToColumns(items, numColumns) {
   const columns = Array.from({ length: numColumns }, () => [])

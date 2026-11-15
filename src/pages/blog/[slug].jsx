@@ -3,12 +3,11 @@ import Link from 'next/link'
 import { NextSeo, ArticleJsonLd } from 'next-seo'
 import Image from 'next/image'
 import clsx from 'clsx'
-import slugify from 'slugify'
 
 import { Container } from '@/components/Container'
 import { Text, renderBlock } from '@/components/RenderNotion'
 import { Prose } from '@/components/Prose'
-import { getDatabase, getPage, getBlocks } from '@/lib/notion'
+import { getArticleSlug, getDatabase, getPage, getBlocks } from '@/lib/notion'
 import { baseUrl } from '../../seo.config'
 
 import { BsArrowLeft } from 'react-icons/bs'
@@ -173,10 +172,7 @@ export const getStaticPaths = async () => {
   return {
     paths: database.map((article) => ({
       params: {
-        slug: slugify(article.properties.name.title[0].plain_text, {
-          strict: true,
-          lower: true,
-        }),
+        slug: getArticleSlug(article),
       },
     })),
     fallback: false,
@@ -186,13 +182,7 @@ export const getStaticPaths = async () => {
 export const getStaticProps = async (context) => {
   const { slug } = context.params
   const database = await getDatabase(databaseId, 'date', 'descending')
-  const post = database.find(
-    (post) =>
-      slugify(post.properties.name.title[0].plain_text, {
-        strict: true,
-        lower: true,
-      }) === slug
-  )
+  const post = database.find((post) => getArticleSlug(post) === slug)
   if (!post) {
     return { notFound: true }
   }

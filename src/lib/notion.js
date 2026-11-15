@@ -1,8 +1,23 @@
 import { Client } from '@notionhq/client'
+import slugify from 'slugify'
 
 const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 })
+
+// The URL slug for a post comes from the `slug` column in Notion.
+// Falls back to a slugified title, then to the page id, so a
+// Chinese-only title (which slugifies to an empty string) never
+// produces an empty path that collides with /blog.
+export const getArticleSlug = (article) => {
+  const slugProp = article.properties?.slug?.rich_text?.[0]?.plain_text
+  if (slugProp) return slugProp
+  const fromTitle = slugify(
+    article.properties?.name?.title?.[0]?.plain_text || '',
+    { strict: true, lower: true }
+  )
+  return fromTitle || article.id
+}
 
 export const getDatabase = async (databaseId, sortProperty, sort) => {
   // Shell mode: Notion not wired yet — return an empty list so the
