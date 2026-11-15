@@ -7,11 +7,9 @@ import slugify from 'slugify'
 
 import { Container } from '@/components/Container'
 import { Text, renderBlock } from '@/components/RenderNotion'
-import { LikeBtn } from '@/components/LikeButton'
 import { Prose } from '@/components/Prose'
 import { getDatabase, getPage, getBlocks } from '@/lib/notion'
 import { baseUrl } from '../../seo.config'
-import { UpdateViews } from '@/components/PageViews'
 
 import { BsArrowLeft } from 'react-icons/bs'
 
@@ -34,7 +32,6 @@ export default function Post({
   const articleDescription = article.properties.description.rich_text
   const wordCount = article.properties.wordCount.number
   const readingTime = Math.ceil(wordCount === null ? 0 : wordCount / 265)
-  const env = process.env.NODE_ENV
 
   const coverImgFn = () => {
     if (article.cover) {
@@ -52,10 +49,6 @@ export default function Post({
   const coverImgCaption = article.properties.coverImgCaption.rich_text.length
     ? article.properties.coverImgCaption.rich_text[0].plain_text
     : false
-  // if env is production, update the views
-  if (env === 'production') {
-    UpdateViews(slug)
-  }
   // console.log(
   //   `${baseUrl}api/og?title=${encodeURIComponent(
   //     articleTitle[0].plain_text
@@ -167,7 +160,6 @@ export default function Post({
               <div className="my-8 text-center text-sm italic text-zinc-400 dark:text-zinc-500 md:my-12">
                 This post was last updated on {lastEditedFormatted}
               </div>
-              <LikeBtn variant="bottom" slug={slug} />
             </article>
           </div>
         </div>
@@ -194,13 +186,17 @@ export const getStaticPaths = async () => {
 export const getStaticProps = async (context) => {
   const { slug } = context.params
   const database = await getDatabase(databaseId, 'date', 'descending')
-  const id = database.find(
+  const post = database.find(
     (post) =>
       slugify(post.properties.name.title[0].plain_text, {
         strict: true,
         lower: true,
       }) === slug
-  ).id
+  )
+  if (!post) {
+    return { notFound: true, revalidate: 1 }
+  }
+  const id = post.id
   const article = await getPage(id)
   const lastEditedUtc = article.last_edited_time
   const lastEditedFormatted = new Date(lastEditedUtc).toLocaleDateString(

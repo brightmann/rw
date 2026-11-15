@@ -5,6 +5,11 @@ const notion = new Client({
 })
 
 export const getDatabase = async (databaseId, sortProperty, sort) => {
+  // Shell mode: Notion not wired yet — return an empty list so the
+  // portfolio builds and deploys without a token/database.
+  if (!process.env.NOTION_TOKEN || !databaseId) {
+    return []
+  }
   // const response = await notion.databases.query({
   //   database_id: databaseId,
   // });

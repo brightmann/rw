@@ -5,11 +5,9 @@ import clsx from 'clsx'
 
 import { Text } from '@/components/RenderNotion'
 
-import { BsHeartFill } from 'react-icons/bs'
 import { GoBook } from 'react-icons/go'
-import CountUp from 'react-countup'
 
-export function BlogCard({ article, likes = 0, slug }) {
+export function BlogCard({ article, slug }) {
   const articleTitle = article.properties?.name.title[0].plain_text
   const articleDescription = article.properties.description?.rich_text
   const [status, setStatus] = useState(article.properties.Status?.status?.name)
@@ -108,11 +106,6 @@ export function BlogCard({ article, likes = 0, slug }) {
         </p>
         {fixedStatus !== '🌱  Seedling' && (
           <div className="mt-4 flex items-center justify-between">
-            <span className="flex items-center font-poppins text-xs tracking-wide text-zinc-900 dark:text-zinc-100">
-              <BsHeartFill className="mr-2 h-3.5 w-3.5 text-rose-500 dark:text-rose-400" />
-              <CountUp end={likes} duration={2} separator="," />
-              <span className="ml-1">{likes === 1 ? 'like' : 'likes'}</span>
-            </span>
             <span className="flex items-center font-poppins text-xs text-zinc-900 dark:text-zinc-100">
               <GoBook className="mr-2 h-[0.9rem] w-[0.9rem]" />
               {readingTime} min read
