@@ -179,7 +179,7 @@ export const getStaticPaths = async () => {
         }),
       },
     })),
-    fallback: true,
+    fallback: false,
   }
 }
 
@@ -194,7 +194,7 @@ export const getStaticProps = async (context) => {
       }) === slug
   )
   if (!post) {
-    return { notFound: true, revalidate: 1 }
+    return { notFound: true }
   }
   const id = post.id
   const article = await getPage(id)
@@ -247,6 +247,5 @@ export const getStaticProps = async (context) => {
       blocks: blocksWithChildren,
       slug: slug,
     },
-    revalidate: 1,
   }
 }
