@@ -19,6 +19,16 @@ export const getArticleSlug = (article) => {
   return fromTitle || article.id
 }
 
+export const POSTS_PER_PAGE = 6
+
+export const getTotalPages = (totalArticles) =>
+  Math.max(1, Math.ceil(totalArticles / POSTS_PER_PAGE))
+
+export const getPageArticles = (database, page) => {
+  const start = (page - 1) * POSTS_PER_PAGE
+  return database.slice(start, start + POSTS_PER_PAGE)
+}
+
 export const getDatabase = async (databaseId, sortProperty, sort) => {
   // Shell mode: Notion not wired yet — return an empty list so the
   // portfolio builds and deploys without a token/database.

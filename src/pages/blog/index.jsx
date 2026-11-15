@@ -1,47 +1,16 @@
 import { NextSeo } from 'next-seo'
 
 import { SimpleLayout } from '@/components/SimpleLayout'
-import { BlogCard } from '@/components/BlogCard'
-import { getArticleSlug, getDatabase } from '@/lib/notion'
+import { BlogList } from '@/components/BlogList'
+import { Pagination } from '@/components/Pagination'
+import {
+  getDatabase,
+  getPageArticles,
+  getTotalPages,
+} from '@/lib/notion'
 import { baseUrl } from '../../seo.config'
 
-function distributeToColumns(items, numColumns) {
-  const columns = Array.from({ length: numColumns }, () => [])
-
-  items.forEach((item, index) => {
-    columns[index % numColumns].push(item)
-  })
-
-  return columns
-}
-
-function renderColumns(columns) {
-  return columns.map((column, columnIndex) => (
-    <div key={`column-${columnIndex}`} className="space-y-10">
-      {column.map(({ article, slug }) => (
-        <BlogCard
-          key={article.id ?? slug}
-          article={article}
-          slug={slug}
-        />
-      ))}
-    </div>
-  ))
-}
-
-export default function Blog({ articles }) {
-  const articleCards = articles.map((article) => {
-    const slug = getArticleSlug(article)
-
-    return {
-      article,
-      slug,
-    }
-  })
-
-  const tabletColumns = distributeToColumns(articleCards, 2)
-  const desktopColumns = distributeToColumns(articleCards, 3)
-
+export default function Blog({ articles, totalPages }) {
   return (
     <>
       <NextSeo
@@ -68,21 +37,8 @@ export default function Blog({ articles }) {
         postTitle="Digital Garden."
         intro="This is a collection of my long-form thoughts on Web Dev, AI, Blockchains, and more in various stages of completion from Seedling to Evergreen. I hope you find something that piques your interest."
       >
-        <div className="space-y-10 md:hidden">
-          {articleCards.map(({ article, slug }) => (
-            <BlogCard
-              key={article.id ?? slug}
-              article={article}
-              slug={slug}
-            />
-          ))}
-        </div>
-        <div className="hidden grid-cols-2 gap-6 md:grid lg:hidden">
-          {renderColumns(tabletColumns)}
-        </div>
-        <div className="hidden grid-cols-3 gap-6 lg:grid">
-          {renderColumns(desktopColumns)}
-        </div>
+        <BlogList articles={articles} />
+        <Pagination currentPage={1} totalPages={totalPages} />
       </SimpleLayout>
     </>
   )
@@ -93,7 +49,8 @@ export const getStaticProps = async () => {
 
   return {
     props: {
-      articles: database,
+      articles: getPageArticles(database, 1),
+      totalPages: getTotalPages(database.length),
     },
   }
 }
